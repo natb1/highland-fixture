@@ -1,0 +1,66 @@
+var _ = require('highland')
+var path = require('path')
+var CryptoJS = require('crypto-js')
+var fs = require('fs')
+
+exports.recordedStream = function (streamGetter, name) {
+  console.log('[highland-fixture] patching', name)
+  var fixtureDir = process.env.FIXTURE_DIR
+  fixtureDir = fixtureDir || path.join(process.cwd(), '.fixtures')
+  return function () {
+    var self = this
+    var args = arguments
+    var argID = CryptoJS.MD5(args).toString()
+    var streamFile = path.join(fixtureDir, name+'.'+argID+'.stream')
+    var wrappedStream = _(function (push, next) {
+      fs.stat(streamFile, function (err, stat) {
+        if (err == null) {
+          push(null, true)
+        } else if (err.code == 'ENOENT') {
+          push(null, false)
+        } else {
+          push(err, null)
+        }
+        push(null, _.nil)
+      })
+    })
+    .flatMap(function (exists) {
+      if (exists) {
+        console.log('[highland-fixture]', 'using recorded stream', streamFile)
+        return _.wrapCallback(fs.readFile)(streamFile)
+          .split()
+          .map(JSON.parse)
+      } else {
+        console.log('[highland-fixture]', 'recording stream', streamFile)
+        return _.wrapCallback(fs.mkdir)(fixtureDir)
+          .errors(function (err, push) {
+            if (err.code != 'EEXIST') {
+              push(err, null)
+            } else {
+              push(null, true)
+            }
+          })
+          .flatMap(function () {
+            var stream = streamGetter.apply(self, args)
+            var cache = stream.fork()
+            var downstream = stream.fork()
+            cache.resume()
+            downstream.resume()
+            cache
+              .map(JSON.stringify)
+              .intersperse('\n')
+              .flatMap(function (line) {
+                return _.wrapCallback(fs.appendFile)(streamFile, line)
+              })
+              .done(function () {})
+            return downstream
+          })
+      }
+    })
+    .errors(function (err, push) {
+      console.log('[highland-fixture]', name, err)
+    })
+    wrappedStream.streamFile = streamFile
+    return wrappedStream
+  }
+}

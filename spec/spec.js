@@ -1,9 +1,7 @@
-# highland-fixture
+var _ = require('highland')
+var recordedStream = require('../index').recordedStream
+var fs = require('fs-extra')
 
-Wrap highland streams to record test fixtures - similar to how VCR and sepia
-create fixtures by patching http.
-
-```
 describe("stream recorder", function() {
 
   process.env.FIXTURE_DIR = fixtureDir
@@ -24,6 +22,10 @@ describe("stream recorder", function() {
     })
   }
 
+  beforeEach(function (callback) {
+    fs.remove(process.env.FIXTURE_DIR, callback)
+  })
+
   it("records a stream when none exists", function(callback) {
     var recordedExample = recordedStream(exampleStreamGetter, 'example')
     var exampleStream = recordedExample('test error', 10)
@@ -35,5 +37,12 @@ describe("stream recorder", function() {
         })
       })
   });
-})
-```
+
+//  it("records different streams given different arguments", function() {
+//  });
+//
+//  it("replays a stream when one is available", function() {
+//  });
+
+});
+
