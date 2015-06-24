@@ -6,7 +6,7 @@ create fixtures by patching http.
 ```
 describe("stream recorder", function() {
 
-  process.env.FIXTURE_DIR = fixtureDir
+  process.env.FIXTURE_DIR = '.fixtures' // default
 
   var exampleStreamGetter = function (err, max) {
     var count = 0
@@ -24,7 +24,7 @@ describe("stream recorder", function() {
     })
   }
 
-  it("records a stream when none exists", function(callback) {
+  it("records a stream when no recording exists", function(callback) {
     var recordedExample = recordedStream(exampleStreamGetter, 'example')
     var exampleStream = recordedExample('test error', 10)
     exampleStream
@@ -34,6 +34,14 @@ describe("stream recorder", function() {
           callback()
         })
       })
+  });
+
+  it("records different streams given different arguments", function() {
+    var recordedExample = recordedStream(exampleStreamGetter, 'example')
+    var firstExampleStream = recordedExample('test error', 10)
+    var secondExampleStream = recordedExample('test error', 20)
+    expect(firstExampleStream.streamFile)
+      .not.toEqual(secondExampleStream.streamFile)
   });
 })
 ```

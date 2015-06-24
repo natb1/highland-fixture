@@ -1,16 +1,15 @@
 {
   "name": "highland-fixture",
-  "version": "0.0.0",
-  "description": "",
+  "version": "0.1.0",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "./node_modules/jasmine/bin/jasmine.js"
   },
   "repository": {
     "type": "git",
     "url": "git://github.com/natb1/highland-fixture.git"
   },
-  "author": "",
+  "author": "Nathan Buesgens",
   "license": "BSD-2-Clause",
   "bugs": {
     "url": "https://github.com/natb1/highland-fixture/issues"

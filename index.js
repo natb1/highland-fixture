@@ -1,7 +1,7 @@
 var _ = require('highland')
 var path = require('path')
 var CryptoJS = require('crypto-js')
-var fs = require('fs')
+var fs = require('fs-extra')
 
 exports.recordedStream = function (streamGetter, name) {
   console.log('[highland-fixture] patching', name)
@@ -10,7 +10,7 @@ exports.recordedStream = function (streamGetter, name) {
   return function () {
     var self = this
     var args = arguments
-    var argID = CryptoJS.MD5(args).toString()
+    var argID = CryptoJS.MD5(JSON.stringify(args)).toString()
     var streamFile = path.join(fixtureDir, name+'.'+argID+'.stream')
     var wrappedStream = _(function (push, next) {
       fs.stat(streamFile, function (err, stat) {
@@ -52,13 +52,14 @@ exports.recordedStream = function (streamGetter, name) {
               .flatMap(function (line) {
                 return _.wrapCallback(fs.appendFile)(streamFile, line)
               })
+              .errors(function (err, push) {
+                console.log('[highland-fixture]', 'WARNING', 
+                            'error not recored', err)
+              })
               .done(function () {})
             return downstream
           })
       }
-    })
-    .errors(function (err, push) {
-      console.log('[highland-fixture]', name, err)
     })
     wrappedStream.streamFile = streamFile
     return wrappedStream
