@@ -28,12 +28,7 @@ exports.recordedStream = function (streamGetter, name) {
       if (exists) {
         console.log('[highland-fixture]', 'using recorded stream', streamFile)
         return _.wrapCallback(fs.readFile)(streamFile)
-          .map(function (data) {
-            if (data == '') { // stream is empty
-              return _.nil
-            }
-            return data
-          })
+          .filter(function (data) { return data != '' }) // stream is not empty
           .split()
           .map(JSON.parse)
       } else {
