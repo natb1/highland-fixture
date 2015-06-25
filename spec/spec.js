@@ -28,7 +28,7 @@ describe("stream recorder", function() {
 
   it("records a stream when no recording exists", function(callback) {
     var recordedExample = recordedStream(exampleStreamGetter, 'example')
-    var exampleStream = recordedExample('test error', 10)
+    var exampleStream = recordedExample('test error', 0)
     exampleStream
       .errors(function (err, push) { console.log(err) })
       .done(function () {
@@ -47,8 +47,17 @@ describe("stream recorder", function() {
       .not.toEqual(secondExampleStream.streamFile)
   });
 
-//  it("replays a stream when one is available", function() {
-//  });
+  it("replays a stream when one is available", function(callback) {
+    process.env.FIXTURE_DIR = '.fixtures' // TODO: this is not idempotent
+    var recordedExample = recordedStream(exampleStreamGetter, 'example')
+    var exampleStream = recordedExample('test error', 10)
+      .errors(function (err, push) { console.log(err) })
+      .done(function () {
+        // TODO: how to test? currently I just verify the console output
+        expect(true).toBe(true)
+        callback()
+      })
+  });
 
 });
 

@@ -32,14 +32,7 @@ exports.recordedStream = function (streamGetter, name) {
           .map(JSON.parse)
       } else {
         console.log('[highland-fixture]', 'recording stream', streamFile)
-        return _.wrapCallback(fs.mkdir)(fixtureDir)
-          .errors(function (err, push) {
-            if (err.code != 'EEXIST') {
-              push(err, null)
-            } else {
-              push(null, true)
-            }
-          })
+        return _.wrapCallback(fs.ensureFile)(streamFile)
           .flatMap(function () {
             var stream = streamGetter.apply(self, args)
             var cache = stream.fork()
