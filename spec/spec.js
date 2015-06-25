@@ -50,7 +50,7 @@ describe("stream recorder", function() {
   it("replays a stream when one is available", function(callback) {
     process.env.FIXTURE_DIR = '.fixtures' // TODO: this is not idempotent
     var recordedExample = recordedStream(exampleStreamGetter, 'example')
-    var exampleStream = recordedExample('test error', 10)
+    var exampleStream = recordedExample('test error', 0)
       .errors(function (err, push) { console.log(err) })
       .done(function () {
         // TODO: how to test? currently I just verify the console output
