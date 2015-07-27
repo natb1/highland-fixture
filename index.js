@@ -27,6 +27,7 @@ exports.recordedStream = function (streamGetter, name) {
     .flatMap(function (exists) {
       if (exists) {
         console.log('[highland-fixture]', 'using recorded stream', streamFile)
+        console.log(args)
         return _.wrapCallback(fs.readFile)(streamFile)
           .filter(function (data) { return data != '' }) // stream is not empty
           .split()
